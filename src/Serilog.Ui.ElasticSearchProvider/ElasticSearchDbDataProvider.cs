@@ -24,10 +24,11 @@ namespace Serilog.Ui.ElasticSearchProvider
             int count,
             string level = null,
             string searchCriteria = null,
+            string user = null,
             DateTime? startDate = null,
             DateTime? endDate = null)
         {
-            return GetLogsAsync(page - 1, count, level, searchCriteria, startDate, endDate);
+            return GetLogsAsync(page - 1, count, level, searchCriteria, user, startDate, endDate);
         }
 
         private async Task<(IEnumerable<LogModel>, int)> GetLogsAsync(
@@ -35,6 +36,7 @@ namespace Serilog.Ui.ElasticSearchProvider
             int count,
             string level,
             string searchCriteria,
+            string user,
             DateTime? startDate = null,
             DateTime? endDate = null,
             CancellationToken cancellationToken = default)
@@ -46,6 +48,7 @@ namespace Serilog.Ui.ElasticSearchProvider
                 .Skip(page * count)
                 .Query(q =>
                     +q.Match(m => m.Field(f => f.Level).Query(level)) &&
+                    +q.Match(m => m.Field(f => f.User).Query(user)) &&
                     +q.DateRange(dr => dr.Field(f => f.Timestamp).GreaterThanOrEquals(startDate).LessThanOrEquals(endDate)) &&
                     +q.Match(m => m.Field(f => f.Message).Query(searchCriteria)) ||
                     +q.Match(m => m.Field(f => f.Exceptions).Query(searchCriteria)));

@@ -48,9 +48,10 @@ const prepareSearchUrl = (identifiedPage?: number) => {
     const levelSelect = document.querySelector<HTMLSelectElement>("#level");
     const level = levelSelect.options.item(levelSelect.selectedIndex).value;
     const searchTerm = escape(document.querySelector<HTMLInputElement>("#search").value);
+    const userName = escape(document.querySelector<HTMLInputElement>("#userName").value);
     const host = process.env.NODE_ENV === "development" ? "" : location.pathname.replace("/index.html", "");
 
-    const url = `${host}/api/logs?page=${page}&count=${count}&level=${level}&search=${searchTerm}&startDate=${startDate}&endDate=${endDate}`;
+    const url = `${host}/api/logs?page=${page}&count=${count}&level=${level}&search=${searchTerm}&startDate=${startDate}&endDate=${endDate}&userName=${userName}`;
     return { areDatesAdmitted: true, url };
 }
 
@@ -69,6 +70,7 @@ const onFetchLogs = (data: SearchResult) => {
             <td class="log-message">
                 <span class="overflow-auto"><truncate length="100">${fixedLengthMessageWithModal(cleanHtmlTags(log.message), 100)}</truncate></span>
             </td>
+            <td class="text-center">${log.userName}</td>
             <td class="text-center">
                 ${exceptionLog(log.exception)}
             </td>

@@ -9,6 +9,7 @@ namespace Serilog.Ui.Core
         public virtual string Level { get; set; }
 
         public virtual string Message { get; set; }
+        public virtual string UserName { get; set; }
 
         public virtual DateTime Timestamp { get; set; }
 

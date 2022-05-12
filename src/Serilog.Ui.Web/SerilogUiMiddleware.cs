@@ -141,6 +141,7 @@ namespace Serilog.Ui.Web
             httpContext.Request.Query.TryGetValue("page", out var pageStr);
             httpContext.Request.Query.TryGetValue("count", out var countStr);
             httpContext.Request.Query.TryGetValue("level", out var levelStr);
+            httpContext.Request.Query.TryGetValue("user", out var user);
             httpContext.Request.Query.TryGetValue("search", out var searchStr);
             httpContext.Request.Query.TryGetValue("startDate", out var startDateStar);
             httpContext.Request.Query.TryGetValue("endDate", out var endDateStar);
@@ -159,7 +160,7 @@ namespace Serilog.Ui.Web
 
             var provider = httpContext.RequestServices.GetService<IDataProvider>();
             var (logs, total) = await provider.FetchDataAsync(currentPage, count, levelStr, searchStr,
-                startDate == default ? (DateTime?)null : startDate, endDate == default ? (DateTime?)null : endDate);
+                user, startDate == default ? (DateTime?)null : startDate, endDate == default ? (DateTime?)null : endDate);
             //var result = JsonSerializer.Serialize(logs, _jsonSerializerOptions);
             var result = JsonConvert.SerializeObject(new { logs, total, count, currentPage }, _jsonSerializerOptions);
             return result;
@@ -171,8 +172,10 @@ namespace Serilog.Ui.Web
                 return true;
 
             var authOptions = httpContext.RequestServices.GetService<AuthorizationOptions>();
+            
+            // if not authorization is required return true
             if (!authOptions.Enabled)
-                return false;
+                return true;
 
             if (!httpContext.User.Identity.IsAuthenticated)
                 return false;

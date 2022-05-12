@@ -23,12 +23,13 @@ namespace Serilog.Ui.MsSqlServerProvider
             int count,
             string logLevel = null,
             string searchCriteria = null,
+            string user = null,
             DateTime? startDate = null,
             DateTime? endDate = null
         )
         {
-            var logsTask = GetLogsAsync(page - 1, count, logLevel, searchCriteria, startDate, endDate);
-            var logCountTask = CountLogsAsync(logLevel, searchCriteria, startDate, endDate);
+            var logsTask = GetLogsAsync(page - 1, count, logLevel, searchCriteria, user, startDate, endDate);
+            var logCountTask = CountLogsAsync(logLevel, searchCriteria, user, startDate, endDate);
 
             await Task.WhenAll(logsTask, logCountTask);
 
@@ -40,17 +41,18 @@ namespace Serilog.Ui.MsSqlServerProvider
             int count,
             string level,
             string searchCriteria,
+            string user,
             DateTime? startDate,
             DateTime? endDate)
         {
             var queryBuilder = new StringBuilder();
-            queryBuilder.Append("SELECT [Id], [Message], [Level], [TimeStamp], [Exception], [Properties] FROM [");
+            queryBuilder.Append("SELECT [Id], [Message], [Level], [TimeStamp], [Exception], [Properties], [UserName] FROM [");
             queryBuilder.Append(_options.Schema);
             queryBuilder.Append("].[");
             queryBuilder.Append(_options.TableName);
             queryBuilder.Append("] ");
 
-            GenerateWhereClause(queryBuilder, level, searchCriteria, startDate, endDate);
+            GenerateWhereClause(queryBuilder, level, searchCriteria, user, startDate, endDate);
 
             queryBuilder.Append("ORDER BY Id DESC OFFSET @Offset ROWS FETCH NEXT @Count ROWS ONLY");
 
@@ -63,6 +65,7 @@ namespace Serilog.Ui.MsSqlServerProvider
                         Count = count,
                         Level = level,
                         Search = searchCriteria != null ? "%" + searchCriteria + "%" : null,
+                        UserName = user,
                         StartDate = startDate,
                         EndDate = endDate
                     });
@@ -78,6 +81,7 @@ namespace Serilog.Ui.MsSqlServerProvider
         private async Task<int> CountLogsAsync(
             string level,
             string searchCriteria,
+            string user,
             DateTime? startDate = null,
             DateTime? endDate = null)
         {
@@ -88,7 +92,7 @@ namespace Serilog.Ui.MsSqlServerProvider
             queryBuilder.Append(_options.TableName);
             queryBuilder.Append("] ");
 
-            GenerateWhereClause(queryBuilder, level, searchCriteria, startDate, endDate);
+            GenerateWhereClause(queryBuilder, level, searchCriteria, user, startDate, endDate);
 
             using (IDbConnection connection = new SqlConnection(_options.ConnectionString))
             {
@@ -107,6 +111,7 @@ namespace Serilog.Ui.MsSqlServerProvider
             StringBuilder queryBuilder,
             string level,
             string searchCriteria,
+            string user,
             DateTime? startDate = null,
             DateTime? endDate = null)
         {
@@ -115,6 +120,12 @@ namespace Serilog.Ui.MsSqlServerProvider
             if (!string.IsNullOrEmpty(level))
             {
                 queryBuilder.Append("WHERE [LEVEL] = @Level ");
+                whereIncluded = true;
+            }
+
+            if (!string.IsNullOrEmpty(user))
+            {
+                queryBuilder.Append("WHERE [UserName] = @UserName ");
                 whereIncluded = true;
             }
 

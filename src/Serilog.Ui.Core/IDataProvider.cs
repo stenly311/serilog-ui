@@ -24,6 +24,7 @@ namespace Serilog.Ui.Core
             int count,
             string level = null,
             string searchCriteria = null,
+            string userName = null,
             DateTime? startDate = null,
             DateTime? endDate = null
         );

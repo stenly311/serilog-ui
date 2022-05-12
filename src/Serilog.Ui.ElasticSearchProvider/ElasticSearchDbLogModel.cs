@@ -15,6 +15,9 @@ namespace Serilog.Ui.ElasticSearchProvider
         [JsonProperty("message")]
         public string Message { get; set; }
 
+        [JsonProperty("userName")]
+        public string User { get; set; }
+
         [JsonProperty("@timestamp")]
         [Date(Name = "@timestamp")]
         public DateTime Timestamp { get; set; }
@@ -31,6 +34,7 @@ namespace Serilog.Ui.ElasticSearchProvider
                 RowNo = index,
                 Level = Level,
                 Message = Message,
+                UserName = User,
                 Timestamp = Timestamp,
                 Exception = Exceptions?.Count > 0 ? BuildExceptionMessage(Exceptions[0]) : null,
                 Properties = JsonConvert.SerializeObject(Fields),

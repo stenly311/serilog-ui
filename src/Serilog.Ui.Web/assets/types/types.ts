@@ -40,6 +40,7 @@ export type SeriLogObject = {
     level: LogLevel,
     message: string,
     timestamp: string,
+    userName: string,
     exception?: { [index: string]: string },
     properties?: { [index: string]: string },
     propertyType: LogType,
@@ -49,6 +50,7 @@ export type EncodedSeriLogObject = {
     rowNo: number,
     level: string,
     message: string,
+    userName: string,
     timestamp: string,
     exception?: string,
     properties?: string,
@@ -67,6 +69,7 @@ export enum SearchParameters {
     Page = 'page',
     Level = 'level',
     Search = 'search',
+    UserName = 'userName',
     StartDate = 'startDate', // wip
     EndDate = 'endDate', // wip
     SortDirection = 'sort' // wip
